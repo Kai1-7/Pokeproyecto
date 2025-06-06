@@ -5,6 +5,7 @@ import 'auth/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
@@ -17,10 +18,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pokeproyecto',
-      initialRoute: '/login',
+      initialRoute: '/landing',
       routes: {
         '/login': (context) => Login(), //Pantalla de login
         '/home': (context) => Home(), //Esta pantalla
+        '/landing': (context) => Landing(),
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
