@@ -36,7 +36,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               final p = pokemons[index];
               return ListTile(
                 title: Text(p.name.toUpperCase()),
-                subtitle: Text(p.url),
+                //subtitle: Text(p.url),
               );
             },
           );
@@ -45,4 +45,3 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     );
   }
 }
-    

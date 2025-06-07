@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:pokeproyecto/screens/pokemon_list_screen.dart';
 import 'firebase_options.dart';
 import 'auth/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => Login(), //Pantalla de login
         '/home': (context) => Home(), //Esta pantalla
         '/landing': (context) => Landing(),
+        '/list': (context) => PokemonListScreen(),
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -52,7 +54,17 @@ class _HomeState extends State<Home> {
           //botones
         ],
       ),
-      body: const Center(child: Text("Home page")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => PokemonListScreen()),
+            );
+          },
+          child: const Text("Lista"),
+        ),
+      ),
     );
   }
 }

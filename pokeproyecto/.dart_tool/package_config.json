@@ -140,6 +140,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "http",
+      "rootUri": "file:///C:/Users/soloc/AppData/Local/Pub/Cache/hosted/pub.dev/http-0.13.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
+    },
+    {
       "name": "http_parser",
       "rootUri": "file:///C:/Users/soloc/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2",
       "packageUri": "lib/",
@@ -278,7 +284,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-06-05T03:24:20.675189Z",
+  "generated": "2025-06-07T19:09:09.334180Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/flutter",
