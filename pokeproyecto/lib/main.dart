@@ -54,6 +54,34 @@ class _HomeState extends State<Home> {
           //botones
         ],
       ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.deepPurple),
+              child: Text("Menú"),
+            ),
+            ListTile(
+              title: Text("Home"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home()),
+                );
+              },
+            ),
+            ListTile(
+              title: Text("Lista"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => PokemonListScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: Center(
         child: ElevatedButton(
           onPressed: () {

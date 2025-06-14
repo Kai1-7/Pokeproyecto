@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/pokeapi_service.dart';
 import '../models/pokemon_model.dart';
+import '../main.dart';
 
 class PokemonListScreen extends StatefulWidget {
   @override
@@ -19,7 +20,42 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Pokémon')),
+      appBar: AppBar(
+        title: const Text("Pokemon"),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+        actions: [
+          //botones
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.deepPurple),
+              child: Text("Menú"),
+            ),
+            ListTile(
+              title: Text("Home"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home()),
+                );
+              },
+            ),
+            ListTile(
+              title: Text("Lista"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => PokemonListScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
       body: FutureBuilder<List<Pokemon>>(
         future: _pokemonList,
         builder: (context, snapshot) {
