@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/pokemon_model.dart';
@@ -36,5 +38,20 @@ class PokeApiService {
       }
     }
     return pokemons;
+  }
+
+  Future<List<Pokemon>> fetchAllBasicPokemon() async {
+    final response = await http.get(
+      Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=1300'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al cargar la lista de nombres');
+    }
+
+    final data = jsonDecode(response.body);
+    final results = data['results'] as List;
+
+    return results.map((json) => Pokemon.fromBasicJson(json)).toList();
   }
 }
