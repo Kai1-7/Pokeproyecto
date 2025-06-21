@@ -54,10 +54,15 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
           .collection('pokemons')
           .doc(pokeId.toString())
           .set({
+            'url': widget.pokemon.url,
             'name': widget.pokemon.name,
             'imageUrl':
                 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
             'types': widget.pokemon.types,
+            'height': widget.pokemon.height,
+            'weight': widget.pokemon.weight,
+            'abilities': widget.pokemon.abilities,
+            'stats': widget.pokemon.stats,
             'timestamp': FieldValue.serverTimestamp(),
           });
     }

@@ -59,10 +59,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Pokémon"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Pokémon"), centerTitle: true),
       drawer: const CustomDrawer(),
       body: SingleChildScrollView(
         child: Column(
@@ -76,7 +73,7 @@ class _HomeState extends State<Home> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                "¿Estás listo para atrapar a los Pokémon más épicos? 🌟 ¡Explora la Pokédex y encuentra a tus favoritos ahora mismo!",
+                "¿Estás listo para atrapar a los Pokémon más épicos? ¡Explora la PokeApp y encuentra a tus favoritos ahora mismo!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -93,7 +90,10 @@ class _HomeState extends State<Home> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B4CCA),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 18,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -102,7 +102,7 @@ class _HomeState extends State<Home> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              child: const Text("Ver Pokédex"),
+              child: const Text("Ver PokeApp"),
             ),
           ],
         ),

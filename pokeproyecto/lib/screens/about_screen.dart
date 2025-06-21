@@ -13,16 +13,14 @@ class AboutScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final userId = user?.uid ?? '';
 
-    final hasPhoto = user?.photoURL != null &&
+    final hasPhoto =
+        user?.photoURL != null &&
         user!.photoURL!.isNotEmpty &&
         Uri.tryParse(user.photoURL!)?.hasAbsolutePath == true;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Perfil',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Perfil', style: TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF3B4CCA),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -41,29 +39,31 @@ class AboutScreen extends StatelessWidget {
                   ),
                   color: Colors.white,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 24, horizontal: 28),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                      horizontal: 28,
+                    ),
                     child: Column(
                       children: [
                         hasPhoto
                             ? CircleAvatar(
-                                radius: 60,
-                                backgroundImage: NetworkImage(user!.photoURL!),
-                              )
+                              radius: 60,
+                              backgroundImage: NetworkImage(user!.photoURL!),
+                            )
                             : CircleAvatar(
-                                radius: 60,
-                                backgroundColor: Colors.grey.shade300,
-                                child: Text(
-                                  (user?.email != null && user!.email!.isNotEmpty)
-                                      ? user.email![0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54,
-                                  ),
+                              radius: 60,
+                              backgroundColor: Colors.grey.shade300,
+                              child: Text(
+                                (user?.email != null && user!.email!.isNotEmpty)
+                                    ? user.email![0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
                                 ),
                               ),
+                            ),
                         const SizedBox(height: 16),
                         Text(
                           user?.displayName ?? 'Entrenador sin nombre',
@@ -109,11 +109,16 @@ class AboutScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('favoritos')
-                    .doc(userId)
-                    .collection('pokemons')
-                    .snapshots(),
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('favoritos')
+                        .doc(userId)
+                        .collection('pokemons')
+                        .orderBy(
+                          'timestamp',
+                          descending: true,
+                        ) // opcional, ordena por fecha
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Padding(
@@ -135,46 +140,47 @@ class AboutScreen extends StatelessWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(12),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 3 / 3.8,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 3 / 3.8,
+                        ),
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final data = docs[index].data() as Map<String, dynamic>;
 
-                      // Previene errores si faltan campos
-                      if (data['url'] == null || data['name'] == null) {
+                      // Validaciones básicas
+                      if (data['name'] == null || data['imageUrl'] == null) {
                         return const SizedBox.shrink();
                       }
 
                       final pokemon = Pokemon(
                         name: data['name'],
-                        url: data['url'],
+                        url: data['url'] ?? '',
                         types: List<String>.from(data['types'] ?? []),
                         height: data['height'] ?? 0,
                         weight: data['weight'] ?? 0,
                         abilities: List<String>.from(data['abilities'] ?? []),
                         stats: Map<String, int>.from(data['stats'] ?? {}),
-                        imageUrl: '',
+                        imageUrl: data['imageUrl'],
                       );
-
-                      final imageUrl =
-                          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${_extractIdFromUrl(pokemon.url)}.png';
 
                       return InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  PokemonDetailScreen(pokemon: pokemon),
+                              builder:
+                                  (_) => PokemonDetailScreen(pokemon: pokemon),
                             ),
                           );
                         },
                         child: Card(
+                          color: _typeColor(
+                            pokemon.types.isNotEmpty ? pokemon.types[0] : '',
+                          ),
                           elevation: 4,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -185,11 +191,11 @@ class AboutScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Image.network(
-                                  imageUrl,
+                                  pokemon.imageUrl,
                                   height: 70,
                                   width: 70,
-                                  errorBuilder: (_, __, ___) =>
-                                      const Icon(Icons.error),
+                                  errorBuilder:
+                                      (_, __, ___) => const Icon(Icons.error),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -203,18 +209,23 @@ class AboutScreen extends StatelessWidget {
                                 const SizedBox(height: 6),
                                 Wrap(
                                   spacing: 6,
-                                  children: pokemon.types
-                                      .map(
-                                        (type) => Chip(
-                                          label: Text(type),
-                                          backgroundColor: Colors.grey.shade400,
-                                          labelStyle: const TextStyle(
-                                              color: Colors.white),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 6),
-                                        ),
-                                      )
-                                      .toList(),
+                                  children:
+                                      pokemon.types
+                                          .map(
+                                            (type) => Chip(
+                                              label: Text(type),
+                                              backgroundColor:
+                                                  Colors.grey.shade400,
+                                              labelStyle: const TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                  ),
+                                            ),
+                                          )
+                                          .toList(),
                                 ),
                               ],
                             ),
@@ -241,5 +252,48 @@ class AboutScreen extends StatelessWidget {
     } catch (_) {
       return 1;
     }
+  }
+}
+
+Color _typeColor(String type) {
+  switch (type.toLowerCase()) {
+    case 'normal':
+      return Colors.brown.shade200;
+    case 'fire':
+      return Colors.redAccent;
+    case 'water':
+      return Colors.lightBlue;
+    case 'electric':
+      return Colors.amber.shade700;
+    case 'grass':
+      return Colors.green;
+    case 'ice':
+      return Colors.cyanAccent.shade100;
+    case 'fighting':
+      return Colors.orange.shade800;
+    case 'poison':
+      return Colors.purple;
+    case 'ground':
+      return Colors.brown;
+    case 'flying':
+      return Colors.indigoAccent.shade100;
+    case 'psychic':
+      return Colors.pinkAccent;
+    case 'bug':
+      return Colors.lightGreen;
+    case 'rock':
+      return Colors.grey.shade700;
+    case 'ghost':
+      return Colors.deepPurpleAccent;
+    case 'dragon':
+      return Colors.deepPurple;
+    case 'dark':
+      return Colors.black54;
+    case 'steel':
+      return Colors.blueGrey;
+    case 'fairy':
+      return Colors.pink.shade200;
+    default:
+      return Colors.grey.shade300;
   }
 }
