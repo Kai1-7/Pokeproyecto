@@ -40,7 +40,10 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   Future<void> _loadMorePokemons({int limit = 20}) async {
     setState(() => _isLoading = true);
     try {
-      final newList = await PokeApiService().fetchPokemons(offset: _offset, limit: limit);
+      final newList = await PokeApiService().fetchPokemons(
+        offset: _offset,
+        limit: limit,
+      );
       _offset += limit;
       setState(() => _visiblePokemons.addAll(newList));
     } catch (e) {
@@ -51,9 +54,10 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   }
 
   Future<void> _searchAndDisplayDetails(String query) async {
-    final matches = _allBasicPokemons
-        .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    final matches =
+        _allBasicPokemons
+            .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
 
     setState(() {
       _isSearching = true;
@@ -152,21 +156,23 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: _isLoading && _visiblePokemons.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : GridView.builder(
-                    padding: const EdgeInsets.all(12),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 3 / 3.8,
+            child:
+                _isLoading && _visiblePokemons.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                      padding: const EdgeInsets.all(12),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 3 / 3.8,
+                          ),
+                      itemCount: _visiblePokemons.length,
+                      itemBuilder: (context, index) {
+                        return PokemonCard(pokemon: _visiblePokemons[index]);
+                      },
                     ),
-                    itemCount: _visiblePokemons.length,
-                    itemBuilder: (context, index) {
-                      return PokemonCard(pokemon: _visiblePokemons[index]);
-                    },
-                  ),
           ),
           if (!_isSearching && !_isLoading)
             Padding(
@@ -176,8 +182,13 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFCC0000),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 14,
+                  ),
                 ),
                 child: const Text("Cargar más"),
               ),
@@ -199,29 +210,41 @@ class PokemonCard extends StatelessWidget {
   }
 
   Color _typeColor(String type) {
-    switch (type) {
+    switch (type.toLowerCase()) {
+      case 'normal':
+        return Colors.brown.shade200;
       case 'fire':
         return Colors.redAccent;
       case 'water':
         return Colors.lightBlue;
-      case 'grass':
-        return Colors.green;
       case 'electric':
         return Colors.amber.shade700;
-      case 'psychic':
-        return Colors.pinkAccent;
+      case 'grass':
+        return Colors.green;
+      case 'ice':
+        return Colors.cyanAccent.shade100;
+      case 'fighting':
+        return Colors.orange.shade800;
+      case 'poison':
+        return Colors.purple;
       case 'ground':
         return Colors.brown;
-      case 'rock':
-        return Colors.grey.shade700;
+      case 'flying':
+        return Colors.indigoAccent.shade100;
+      case 'psychic':
+        return Colors.pinkAccent;
       case 'bug':
         return Colors.lightGreen;
-      case 'ice':
-        return Colors.cyan;
+      case 'rock':
+        return Colors.grey.shade700;
+      case 'ghost':
+        return Colors.deepPurpleAccent;
       case 'dragon':
         return Colors.deepPurple;
       case 'dark':
         return Colors.black54;
+      case 'steel':
+        return Colors.blueGrey;
       case 'fairy':
         return Colors.pink.shade200;
       default:
@@ -248,17 +271,18 @@ class PokemonCard extends StatelessWidget {
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: Colors.white,
+        color: _typeColor(mainType),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
+                /*
                 decoration: BoxDecoration(
                   color: _typeColor(mainType),
                   borderRadius: BorderRadius.circular(20),
-                ),
+                ),*/
                 padding: const EdgeInsets.all(10),
                 child: Image.network(
                   imageUrl,
@@ -274,21 +298,22 @@ class PokemonCard extends StatelessWidget {
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Color(0xFF3B4CCA),
+                  color: Color.fromARGB(255, 255, 255, 255),
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 6,
-                children: pokemon.types.map((type) {
-                  return Chip(
-                    label: Text(type),
-                    backgroundColor: _typeColor(type),
-                    labelStyle: const TextStyle(color: Colors.white),
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                  );
-                }).toList(),
+                children:
+                    pokemon.types.map((type) {
+                      return Chip(
+                        label: Text(type),
+                        backgroundColor: _typeColor(type),
+                        labelStyle: const TextStyle(color: Colors.white),
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      );
+                    }).toList(),
               ),
             ],
           ),

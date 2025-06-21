@@ -24,11 +24,8 @@ class _LoginState extends State<Login> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logotipo.png',
-              height: 350,
-            ),
-            const SizedBox(height:40),
+            Image.asset('assets/images/logotipo.png', height: 350),
+            const SizedBox(height: 40),
             MouseRegion(
               onEnter: (_) => setState(() => _isHovering = true),
               onExit: (_) => setState(() => _isHovering = false),
@@ -37,16 +34,27 @@ class _LoginState extends State<Login> {
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOut,
                 child: ElevatedButton.icon(
-                  icon: Image.asset('assets/images/pokebola.png', width: 35, height: 35,),
+                  icon: Image.asset(
+                    'assets/images/pokebola.png',
+                    width: 35,
+                    height: 35,
+                  ),
                   label: const Text('Iniciar sesión con Google'),
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(const Color(0xFFFBBD08)), // amarillo
-                    foregroundColor: MaterialStateProperty.all(const Color(0xFF3164D9)), // azul
+                    backgroundColor: MaterialStateProperty.all(
+                      const Color(0xFFFBBD08),
+                    ), // amarillo
+                    foregroundColor: MaterialStateProperty.all(
+                      const Color(0xFF3164D9),
+                    ), // azul
                     padding: MaterialStateProperty.all(
                       const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
                     ),
                     textStyle: MaterialStateProperty.all(
-                      const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     shape: MaterialStateProperty.all(
                       RoundedRectangleBorder(
@@ -54,15 +62,17 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     elevation: MaterialStateProperty.all(6),
-                    shadowColor: MaterialStateProperty.all(const Color(0x1AE3350D)),
-                    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.pressed)) {
-                          return const Color(0x30E3350D); // rojo con opacidad
-                        }
-                        return null;
-                      },
+                    shadowColor: MaterialStateProperty.all(
+                      const Color(0x1AE3350D),
                     ),
+                    overlayColor: MaterialStateProperty.resolveWith<Color?>((
+                      Set<MaterialState> states,
+                    ) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return const Color(0x30E3350D); // rojo con opacidad
+                      }
+                      return null;
+                    }),
                   ),
                   onPressed: () async {
                     final userCredential = await signInWithGoogle();
@@ -83,7 +93,6 @@ class _LoginState extends State<Login> {
   }
 }
 
-// 👇 Lógica funcional intacta
 Future<UserCredential?> signInWithGoogle() async {
   final googleProvider = GoogleAuthProvider();
 

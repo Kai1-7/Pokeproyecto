@@ -24,7 +24,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900), // Duración más larga
+      duration: const Duration(milliseconds: 900),
     );
     _animation = Tween<double>(begin: 1.5, end: 0.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
@@ -54,12 +54,12 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
           .collection('pokemons')
           .doc(pokeId.toString())
           .set({
-        'name': widget.pokemon.name,
-        'imageUrl':
-            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
-        'types': widget.pokemon.types,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+            'name': widget.pokemon.name,
+            'imageUrl':
+                'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
+            'types': widget.pokemon.types,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
     }
   }
 
@@ -122,21 +122,26 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
                               height: 160,
                               width: 160,
                               fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.error, size: 100),
+                              errorBuilder:
+                                  (_, __, ___) =>
+                                      const Icon(Icons.error, size: 100),
                             ),
                           ),
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 6,
-                            children: widget.pokemon.types
-                                .map((type) => Chip(
-                                      label: Text(type),
-                                      backgroundColor: _typeColor(type),
-                                      labelStyle:
-                                          const TextStyle(color: Colors.white),
-                                    ))
-                                .toList(),
+                            children:
+                                widget.pokemon.types
+                                    .map(
+                                      (type) => Chip(
+                                        label: Text(type),
+                                        backgroundColor: _typeColor(type),
+                                        labelStyle: const TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
                           ),
                         ],
                       ),
@@ -226,7 +231,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
                         const Text(
                           'Información Adicional',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -234,9 +241,13 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
                           children: [
                             _infoItem('ID', pokeIndex.toString()),
                             _infoItem(
-                                'Altura', '${widget.pokemon.height / 10} m'),
+                              'Altura',
+                              '${widget.pokemon.height / 10} m',
+                            ),
                             _infoItem(
-                                'Peso', '${widget.pokemon.weight / 10} kg'),
+                              'Peso',
+                              '${widget.pokemon.weight / 10} kg',
+                            ),
                           ],
                         ),
                       ],
@@ -292,36 +303,44 @@ Widget _infoItem(String label, String value) {
 }
 
 Color _typeColor(String type) {
-  switch (type) {
+  switch (type.toLowerCase()) {
+    case 'normal':
+      return Colors.brown.shade200;
     case 'fire':
-      return Colors.red;
+      return Colors.redAccent;
     case 'water':
-      return Colors.blue;
+      return Colors.lightBlue;
+    case 'electric':
+      return Colors.amber.shade700;
     case 'grass':
       return Colors.green;
-    case 'electric':
-      return Colors.yellow.shade700;
-    case 'psychic':
-      return Colors.pink;
-    case 'rock':
-      return Colors.brown;
+    case 'ice':
+      return Colors.cyanAccent.shade100;
+    case 'fighting':
+      return Colors.orange.shade800;
+    case 'poison':
+      return Colors.purple;
     case 'ground':
-      return Colors.brown.shade300;
+      return Colors.brown;
     case 'flying':
-      return Colors.indigo;
+      return Colors.indigoAccent.shade100;
+    case 'psychic':
+      return Colors.pinkAccent;
     case 'bug':
       return Colors.lightGreen;
-    case 'ice':
-      return Colors.cyan;
+    case 'rock':
+      return Colors.grey.shade700;
+    case 'ghost':
+      return Colors.deepPurpleAccent;
     case 'dragon':
       return Colors.deepPurple;
     case 'dark':
-      return Colors.black87;
+      return Colors.black54;
     case 'steel':
       return Colors.blueGrey;
     case 'fairy':
-      return Colors.pinkAccent;
+      return Colors.pink.shade200;
     default:
-      return Colors.grey;
+      return Colors.grey.shade300;
   }
 }
