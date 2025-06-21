@@ -48,23 +48,30 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final pokeId = _extractIdFromUrl(widget.pokemon.url);
-      await FirebaseFirestore.instance
+      final docRef = FirebaseFirestore.instance
           .collection('favoritos')
           .doc(user.uid)
           .collection('pokemons')
-          .doc(pokeId.toString())
-          .set({
-            'url': widget.pokemon.url,
-            'name': widget.pokemon.name,
-            'imageUrl':
-                'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
-            'types': widget.pokemon.types,
-            'height': widget.pokemon.height,
-            'weight': widget.pokemon.weight,
-            'abilities': widget.pokemon.abilities,
-            'stats': widget.pokemon.stats,
-            'timestamp': FieldValue.serverTimestamp(),
-          });
+          .doc(pokeId.toString());
+
+      final docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        await docRef.delete();
+      } else {
+        await docRef.set({
+          'url': widget.pokemon.url,
+          'name': widget.pokemon.name,
+          'imageUrl':
+              'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
+          'types': widget.pokemon.types,
+          'height': widget.pokemon.height,
+          'weight': widget.pokemon.weight,
+          'abilities': widget.pokemon.abilities,
+          'stats': widget.pokemon.stats,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
     }
   }
 
