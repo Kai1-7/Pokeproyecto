@@ -45,25 +45,25 @@ class AboutScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        hasPhoto
-                            ? CircleAvatar(
-                              radius: 60,
-                              backgroundImage: NetworkImage(user!.photoURL!),
-                            )
-                            : CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.grey.shade300,
-                              child: Text(
-                                (user?.email != null && user!.email!.isNotEmpty)
-                                    ? user.email![0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage:
+                              hasPhoto ? NetworkImage(user!.photoURL!) : null,
+                          child:
+                              hasPhoto
+                                  ? null
+                                  : Text(
+                                    (user?.email?.isNotEmpty ?? false)
+                                        ? user!.email![0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           user?.displayName ?? 'Entrenador sin nombre',

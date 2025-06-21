@@ -81,7 +81,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen>
     final imageUrl =
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeIndex.png';
 
-    final maxStatValue = 150.0;
+    const maxStatValue = 250.0;
     final statLabels = ['HP', 'ATK', 'DEF', 'SpA', 'SpD', 'SPD'];
     final statValues = _extractStatValues(widget.pokemon);
     final radarData = [
