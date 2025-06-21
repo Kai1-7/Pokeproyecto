@@ -1,18 +1,57 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/pokemon_model.dart';
 
 class PokeApiService {
-  Future<List<Pokemon>> fetchPokemons() async {
-    final response = await http.get(Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=20'));
+  final String baseUrl = 'https://pokeapi.co/api/v2/pokemon';
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return (data['results'] as List)
-          .map((item) => Pokemon.fromJson(item))
-          .toList();
-    } else {
-      throw Exception('Error al cargar Pokémon');
+  Future<List<Pokemon>> fetchPokemons({int offset = 0, int limit = 20}) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl?offset=$offset&limit=$limit'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al cargar la lista de Pokémon');
     }
+
+    final data = jsonDecode(response.body);
+    final results = data['results'] as List;
+
+    List<Pokemon> pokemons = [];
+
+    for (var item in results) {
+      final name = item['name'];
+      final url = item['url'];
+
+      try {
+        final detailResponse = await http.get(Uri.parse(url));
+        if (detailResponse.statusCode != 200) continue;
+
+        final detailData = jsonDecode(detailResponse.body);
+        final pokemon = Pokemon.fromDetailJson(detailData, url: url);
+        pokemons.add(pokemon);
+      } catch (e) {
+        print('Error al cargar detalles de $name: $e');
+        continue;
+      }
+    }
+    return pokemons;
+  }
+
+  Future<List<Pokemon>> fetchAllBasicPokemon() async {
+    final response = await http.get(
+      Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=1300'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Error al cargar la lista de nombres');
+    }
+
+    final data = jsonDecode(response.body);
+    final results = data['results'] as List;
+
+    return results.map((json) => Pokemon.fromBasicJson(json)).toList();
   }
 }

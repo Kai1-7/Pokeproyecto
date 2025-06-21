@@ -113,7 +113,7 @@ class Landing extends StatelessWidget {
           );
         } else if (snapshot.hasData) {
           //Si lo que devuelve el stream no es nulo
-          return const Home();
+          return PokemonListScreen();
         } else {
           //si es nulo vuelve a login
           return const Login();

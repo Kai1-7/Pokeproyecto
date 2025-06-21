@@ -98,6 +98,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "flutter_radar_chart",
+      "rootUri": "file:///C:/Users/Alexandra%20Chacon/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_radar_chart-0.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///C:/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -284,7 +290,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2025-06-07T21:51:25.937657Z",
+  "generated": "2025-06-21T03:52:52.641300Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/flutter",
