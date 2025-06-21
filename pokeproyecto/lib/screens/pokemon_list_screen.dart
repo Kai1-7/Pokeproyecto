@@ -1,13 +1,10 @@
-// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'PokemonDetailScreen.dart';
 import '../models/pokemon_model.dart';
 import '../services/pokeapi_service.dart';
-import '../main.dart';
-
-//LOS CHIPS DENTRO DEL WRAP (LOS QUE MUESTRAN LOS TIPOS) NO SON RESPONSIVE Y ESO DEBE CORREGIRSE
+import '../widgets/custom_drawer.dart';
 
 class PokemonListScreen extends StatefulWidget {
   @override
@@ -16,10 +13,9 @@ class PokemonListScreen extends StatefulWidget {
 
 class _PokemonListScreenState extends State<PokemonListScreen> {
   final TextEditingController _searchController = TextEditingController();
-
-  List<Pokemon> _allBasicPokemons = []; // Solo nombre + url
-  List<Pokemon> _visiblePokemons = []; // Lista con detalles
-  Map<String, Pokemon> _cache = {}; // Evita recargar detalles repetidos
+  List<Pokemon> _allBasicPokemons = [];
+  List<Pokemon> _visiblePokemons = [];
+  Map<String, Pokemon> _cache = {};
 
   bool _isLoading = false;
   bool _isSearching = false;
@@ -44,10 +40,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   Future<void> _loadMorePokemons({int limit = 20}) async {
     setState(() => _isLoading = true);
     try {
-      final newList = await PokeApiService().fetchPokemons(
-        offset: _offset,
-        limit: limit,
-      );
+      final newList = await PokeApiService().fetchPokemons(offset: _offset, limit: limit);
       _offset += limit;
       setState(() => _visiblePokemons.addAll(newList));
     } catch (e) {
@@ -58,10 +51,9 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   }
 
   Future<void> _searchAndDisplayDetails(String query) async {
-    final matches =
-        _allBasicPokemons
-            .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+    final matches = _allBasicPokemons
+        .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
 
     setState(() {
       _isSearching = true;
@@ -111,7 +103,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF3B4CCA),
         title: TextField(
           controller: _searchController,
           decoration: const InputDecoration(
@@ -133,50 +125,60 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
             ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.deepPurple),
-              child: Text("Menú"),
-            ),
-            ListTile(
-              title: const Text("Home"),
-              onTap:
-                  () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Home()),
-                  ),
-            ),
-          ],
-        ),
-      ),
+      drawer: const CustomDrawer(),
       body: Column(
         children: [
-          Expanded(
-            child:
-                _isLoading && _visiblePokemons.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                      padding: const EdgeInsets.all(12),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 5,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 3 / 4,
-                          ),
-                      itemCount: _visiblePokemons.length,
-                      itemBuilder: (context, index) {
-                        return PokemonCard(pokemon: _visiblePokemons[index]);
-                      },
+          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.catching_pokemon, color: Color(0xFF3B4CCA)),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    "¡Atrapa a tus Pokémon favoritos y crea tu colección! 🧢⚡",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF3B4CCA),
                     ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _isLoading && _visiblePokemons.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : GridView.builder(
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 3 / 3.8,
+                    ),
+                    itemCount: _visiblePokemons.length,
+                    itemBuilder: (context, index) {
+                      return PokemonCard(pokemon: _visiblePokemons[index]);
+                    },
+                  ),
           ),
           if (!_isSearching && !_isLoading)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: ElevatedButton(
                 onPressed: _loadMorePokemons,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFCC0000),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                ),
                 child: const Text("Cargar más"),
               ),
             ),
@@ -199,17 +201,31 @@ class PokemonCard extends StatelessWidget {
   Color _typeColor(String type) {
     switch (type) {
       case 'fire':
-        return Colors.red;
+        return Colors.redAccent;
       case 'water':
-        return Colors.blue;
+        return Colors.lightBlue;
       case 'grass':
         return Colors.green;
       case 'electric':
-        return Colors.yellow.shade700;
+        return Colors.amber.shade700;
       case 'psychic':
-        return Colors.pink;
+        return Colors.pinkAccent;
+      case 'ground':
+        return Colors.brown;
+      case 'rock':
+        return Colors.grey.shade700;
+      case 'bug':
+        return Colors.lightGreen;
+      case 'ice':
+        return Colors.cyan;
+      case 'dragon':
+        return Colors.deepPurple;
+      case 'dark':
+        return Colors.black54;
+      case 'fairy':
+        return Colors.pink.shade200;
       default:
-        return Colors.grey;
+        return Colors.grey.shade300;
     }
   }
 
@@ -218,6 +234,7 @@ class PokemonCard extends StatelessWidget {
     final pokeIndex = _extractIdFromUrl(pokemon.url);
     final imageUrl =
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$pokeIndex.png';
+    final mainType = pokemon.types.isNotEmpty ? pokemon.types[0] : 'normal';
 
     return InkWell(
       onTap: () {
@@ -230,37 +247,51 @@ class PokemonCard extends StatelessWidget {
       },
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
-            Image.network(
-              imageUrl,
-              height: 80,
-              width: 80,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(Icons.error),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              pokemon.name.toUpperCase(),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 6,
-              children:
-                  pokemon.types.map((type) {
-                    return Chip(
-                      label: Text(type),
-                      backgroundColor: _typeColor(type),
-                      labelStyle: const TextStyle(color: Colors.white),
-                    );
-                  }).toList(),
-            ),
-          ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: _typeColor(mainType),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.all(10),
+                child: Image.network(
+                  imageUrl,
+                  height: 100,
+                  width: 100,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.error),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                pokemon.name.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Color(0xFF3B4CCA),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 6,
+                children: pokemon.types.map((type) {
+                  return Chip(
+                    label: Text(type),
+                    backgroundColor: _typeColor(type),
+                    labelStyle: const TextStyle(color: Colors.white),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );

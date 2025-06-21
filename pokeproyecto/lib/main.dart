@@ -4,6 +4,8 @@ import 'package:pokeproyecto/screens/pokemon_list_screen.dart';
 import 'firebase_options.dart';
 import 'auth/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pokeproyecto/screens/about_screen.dart';
+import 'package:pokeproyecto/widgets/custom_drawer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,20 +16,31 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Pokeproyecto',
       initialRoute: '/landing',
       routes: {
-        '/login': (context) => Login(), //Pantalla de login
-        '/home': (context) => Home(), //Esta pantalla
-        '/landing': (context) => Landing(),
+        '/login': (context) => const Login(),
+        '/home': (context) => const Home(),
+        '/landing': (context) => const Landing(),
         '/list': (context) => PokemonListScreen(),
+        '/about': (context) => const AboutScreen(),
       },
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3B4CCA)),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF3B4CCA),
+          foregroundColor: Colors.white,
+          titleTextStyle: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
     );
   }
@@ -47,50 +60,51 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pokemon"),
+        title: const Text("Pokémon"),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
-        actions: [
-          //botones
-        ],
       ),
-      drawer: Drawer(
-        child: ListView(
+      drawer: const CustomDrawer(),
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.deepPurple),
-              child: Text("Menú"),
+            Image.asset(
+              'assets/images/banner.png',
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
-            ListTile(
-              title: Text("Home"),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => Home()),
-                );
-              },
+            const SizedBox(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "¿Estás listo para atrapar a los Pokémon más épicos? 🌟 ¡Explora la Pokédex y encuentra a tus favoritos ahora mismo!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF3B4CCA),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            ListTile(
-              title: Text("Lista"),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => PokemonListScreen()),
-                );
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/list');
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B4CCA),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: const Text("Ver Pokédex"),
             ),
           ],
-        ),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => PokemonListScreen()),
-            );
-          },
-          child: const Text("Lista"),
         ),
       ),
     );
@@ -99,23 +113,19 @@ class _HomeState extends State<Home> {
 
 class Landing extends StatelessWidget {
   const Landing({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      //StreamBuilder porque lo que construyamos depende de un stream
-      stream:
-          FirebaseAuth.instance
-              .authStateChanges(), //Depende de esto (el estado de autentificación)
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasData) {
-          //Si lo que devuelve el stream no es nulo
-          return PokemonListScreen();
+          return const Home(); // redirige a Home si ya está logueado
         } else {
-          //si es nulo vuelve a login
           return const Login();
         }
       },

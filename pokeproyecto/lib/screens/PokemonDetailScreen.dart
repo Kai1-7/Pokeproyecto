@@ -1,122 +1,211 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_radar_chart/flutter_radar_chart.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/pokemon_model.dart';
-//NOTA: HAY QUE IMPEDIR QUE LA IMAGEN Y EL RADAR CHART HAGAN OVERFLOW AL CAMBIAR EL TAMAÑO DE LA PANTALLA
 
-class PokemonDetailScreen extends StatelessWidget {
+class PokemonDetailScreen extends StatefulWidget {
   final Pokemon pokemon;
 
   const PokemonDetailScreen({super.key, required this.pokemon});
 
   @override
+  State<PokemonDetailScreen> createState() => _PokemonDetailScreenState();
+}
+
+class _PokemonDetailScreenState extends State<PokemonDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  bool showHeart = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900), // Duración más larga
+    );
+    _animation = Tween<double>(begin: 1.5, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _onFavoritePressed() async {
+    setState(() => showHeart = true);
+    _animationController.forward(from: 0).then((_) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        setState(() => showHeart = false);
+      });
+    });
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final pokeId = _extractIdFromUrl(widget.pokemon.url);
+      await FirebaseFirestore.instance
+          .collection('favoritos')
+          .doc(user.uid)
+          .collection('pokemons')
+          .doc(pokeId.toString())
+          .set({
+        'name': widget.pokemon.name,
+        'imageUrl':
+            'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeId.png',
+        'types': widget.pokemon.types,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final pokeIndex = _extractIdFromUrl(pokemon.url);
+    final pokeIndex = _extractIdFromUrl(widget.pokemon.url);
     final imageUrl =
         'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$pokeIndex.png';
 
-    final maxStatValue = 150.0; // Para normalizar los valores en radar chart
+    final maxStatValue = 150.0;
     final statLabels = ['HP', 'ATK', 'DEF', 'SpA', 'SpD', 'SPD'];
-    final statValues = _extractStatValues(pokemon);
+    final statValues = _extractStatValues(widget.pokemon);
     final radarData = [
       statValues.map((v) => ((v / maxStatValue) * 100).toInt()).toList(),
     ];
 
+    final mainTypeColor = _typeColor(widget.pokemon.types.first);
+
     return Scaffold(
+      backgroundColor: mainTypeColor.withOpacity(0.3),
       appBar: AppBar(
-        title: Text(pokemon.name.toUpperCase()),
-        backgroundColor: Colors.deepPurple,
+        title: Text(widget.pokemon.name.toUpperCase()),
+        backgroundColor: mainTypeColor,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite_border),
+            onPressed: _onFavoritePressed,
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      height: 300,
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.contain,
-                        errorBuilder:
-                            (_, __, ___) => const Icon(Icons.error, size: 100),
-                      ),
-                    ),
-                    Wrap(
-                      spacing: 6,
-                      children:
-                          pokemon.types
-                              .map(
-                                (type) => Chip(
-                                  label: Text(type),
-                                  backgroundColor: _typeColor(type),
-                                  labelStyle: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 20),
-                SizedBox(
-                  height: 300,
-                  width: 300,
-                  child: RadarChart(
-                    features: statLabels,
-                    data: radarData,
-                    ticks: const [20, 50, 80],
-                    outlineColor: Colors.deepPurple,
-                    graphColors: const [Colors.deepPurple],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
                     children: [
-                      const Text(
-                        'Habilidades',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Column(
-                        children:
-                            pokemon.abilities
-                                .map(
-                                  (a) => ListTile(
-                                    dense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                    title: Text(a),
-                                  ),
-                                )
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: mainTypeColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Image.network(
+                              imageUrl,
+                              height: 160,
+                              width: 160,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.error, size: 100),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 6,
+                            children: widget.pokemon.types
+                                .map((type) => Chip(
+                                      label: Text(type),
+                                      backgroundColor: _typeColor(type),
+                                      labelStyle:
+                                          const TextStyle(color: Colors.white),
+                                    ))
                                 .toList(),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 300,
+                        width: 300,
+                        child: RadarChart(
+                          features: statLabels,
+                          data: radarData,
+                          ticks: const [20, 50, 80],
+                          outlineColor: mainTypeColor,
+                          graphColors: [mainTypeColor],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 24),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children:
-                        pokemon.stats.entries.map((entry) {
+                  const SizedBox(height: 24),
+
+                  /// CUADRO HABILIDADES
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: mainTypeColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Habilidades',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...widget.pokemon.abilities.map(
+                          (a) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(a),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  /// CUADRO INFO ADICIONAL + STATS
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: mainTypeColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Estadísticas',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...widget.pokemon.stats.entries.map((entry) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
@@ -133,26 +222,43 @@ class PokemonDetailScreen extends StatelessWidget {
                             ),
                           );
                         }).toList(),
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Información Adicional',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _infoItem('ID', pokeIndex.toString()),
+                            _infoItem(
+                                'Altura', '${widget.pokemon.height / 10} m'),
+                            _infoItem(
+                                'Peso', '${widget.pokemon.weight / 10} kg'),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
+                ],
+              ),
+            ),
+          ),
+          if (showHeart)
+            Positioned(
+              top: 100,
+              child: ScaleTransition(
+                scale: _animation,
+                child: const Icon(
+                  Icons.favorite,
+                  color: Colors.pinkAccent,
+                  size: 60,
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Información Adicional',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _infoItem('ID', pokeIndex.toString()),
-                _infoItem('Altura', '${pokemon.height / 10} m'),
-                _infoItem('Peso', '${pokemon.weight / 10} kg'),
-              ],
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -197,6 +303,24 @@ Color _typeColor(String type) {
       return Colors.yellow.shade700;
     case 'psychic':
       return Colors.pink;
+    case 'rock':
+      return Colors.brown;
+    case 'ground':
+      return Colors.brown.shade300;
+    case 'flying':
+      return Colors.indigo;
+    case 'bug':
+      return Colors.lightGreen;
+    case 'ice':
+      return Colors.cyan;
+    case 'dragon':
+      return Colors.deepPurple;
+    case 'dark':
+      return Colors.black87;
+    case 'steel':
+      return Colors.blueGrey;
+    case 'fairy':
+      return Colors.pinkAccent;
     default:
       return Colors.grey;
   }
